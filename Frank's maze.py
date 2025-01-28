@@ -19,9 +19,17 @@ start_button_rect = start_button.get_rect()
 quit_button_rect = quit_button.get_rect()
 
 
-
 start_button_rect.topleft = ((Hlavni_screen_X - start_button_rect.width) // 2, (Hlavni_screen_Y // 2) - 200)  # 200 pixelů nad střed
 quit_button_rect.topleft = ((Hlavni_screen_X - quit_button_rect.width) // 2, (Hlavni_screen_Y // 2) + 300)  # 300 pixelů pod střed
+
+
+Herni_okno_X = 800
+Herni_okno_Y = 600
+Herni_okno = pygame.Surface((Herni_okno_X, Herni_okno_Y))  
+
+
+main_screen = True
+game_screen = False
 
 
 smycka = True
@@ -35,18 +43,26 @@ while smycka:
             if quit_button_rect.collidepoint(event.pos):  
                 smycka = False  
 
-    
-    Obraz.blit(Background_menu, (0, 0))
+            
+            if start_button_rect.collidepoint(event.pos):
+                game_screen = True  
+                main_screen = False  
 
-    
-    Obraz.blit(start_button, start_button_rect.topleft)
+    if main_screen:
+        
+        Obraz.blit(Background_menu, (0, 0))
+        Obraz.blit(start_button, start_button_rect.topleft)
+        Obraz.blit(quit_button, quit_button_rect.topleft)
 
-    
-    Obraz.blit(quit_button, quit_button_rect.topleft)
+    if game_screen:
+        
+        Herni_okno.fill((0, 255, 0))  
+        Herni_okno_text = pygame.font.SysFont('Arial', 50).render('Herní obrazovka', True, (255, 255, 255))
+        Herni_okno.blit(Herni_okno_text, (Herni_okno_X // 2 - Herni_okno_text.get_width() // 2, Herni_okno_Y // 2 - Herni_okno_text.get_height() // 2))
+        Obraz.blit(Herni_okno, (Hlavni_screen_X // 2 - Herni_okno_X // 2, Hlavni_screen_Y // 2 - Herni_okno_Y // 2))
 
     
     pygame.display.update()
 
 
 pygame.quit()
-
