@@ -20,9 +20,9 @@ start_button_rect = start_button.get_rect()
 quit_button_rect = quit_button.get_rect()
 
 start_button_rect.topleft = ((Hlavni_screen_X - start_button_rect.width) // 2,
-                             (Hlavni_screen_Y // 2) - 200)  
+                            (Hlavni_screen_Y // 2) + 150)  
 quit_button_rect.topleft = ((Hlavni_screen_X - quit_button_rect.width) // 2,
-                            (Hlavni_screen_Y // 2) + 300)  
+                            (Hlavni_screen_Y // 2) + 350)  
 
 # ------------------------ ROZMĚRY HERNÍHO OKNA --------------------------------
 Herni_okno_X = 800
@@ -103,10 +103,10 @@ def generuj_bludiste():
     return mrizka_local
 
 # ----------------------- PARAMETRY HRÁČE a HERNÍ PROMĚNNÉ -----------------------
-Hrac_velikost = 40
+Hrac_velikost = 35
 Hrac_X = Herni_okno_X // 2 - Hrac_velikost // 2
 Hrac_Y = Herni_okno_Y // 2 - Hrac_velikost // 2
-Hrac_speed = 2
+Hrac_speed = 1.5
 
 Hrac_textura = pygame.image.load('hrac.png')
 Hrac_textura = pygame.transform.scale(Hrac_textura, (Hrac_velikost, Hrac_velikost))
