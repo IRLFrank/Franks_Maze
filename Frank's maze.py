@@ -8,7 +8,7 @@ Hlavni_screen_X = 1980
 Hlavni_screen_Y = 1080
 
 
-BLACK = (0, 0, 0)  # Barva stěn
+BLACK = (0, 150, 0)  # Barva stěn
 GREEN = (0, 255, 0)  # Barva pozadí
 
 
@@ -29,7 +29,7 @@ velikost_policka = 40
 Herni_okno_X = 1400
 Herni_okno_Y = 800
 Herni_okno = pygame.Surface((Herni_okno_X, Herni_okno_Y))
-
+background_herni = pygame.image.load("background_herni_image.jpg")
 
 maze_lvl_1 = [
      
@@ -197,8 +197,7 @@ while smycka:
         Obraz.blit(quit_button, quit_button_rect.topleft)
 
     if game_screen:
-        Herni_okno.fill(GREEN)  
-
+        Herni_okno.blit(background_herni, (0, 0))
         
         for radky in range(len(maze)):
             for sloupce in range(len(maze[radky])):
@@ -224,8 +223,10 @@ while smycka:
         Herni_okno.blit(Hrac_textura, (Hrac_X, Hrac_Y))
 
         check_level_complete()
-
+        
         Obraz.blit(Herni_okno, (Hlavni_screen_X // 2 - Herni_okno_X // 2, Hlavni_screen_Y // 2 - Herni_okno_Y // 2))
+        
+    
         
     pygame.display.update()
 
