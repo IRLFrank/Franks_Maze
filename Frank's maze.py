@@ -1,16 +1,11 @@
 import pygame
 from pygame.locals import * 
 
-
-
-
 Hlavni_screen_X = 1980  
 Hlavni_screen_Y = 1080
 
-
 BLACK = (0, 0, 0)  # Barva stěn
-GREEN = (0, 255, 0)  # Barva pozadí
-
+GREEN = (0, 0, 0)  # Barva pozadí
 
 Background_menu = pygame.image.load('background.jpg')
 Obraz = pygame.display.set_mode((Hlavni_screen_X, Hlavni_screen_Y))
@@ -24,7 +19,6 @@ quit_button_rect = quit_button.get_rect()
 start_button_rect.topleft = ((Hlavni_screen_X - start_button_rect.width) // 2, (Hlavni_screen_Y // 2) - 200)  
 quit_button_rect.topleft = ((Hlavni_screen_X - quit_button_rect.width) // 2, (Hlavni_screen_Y // 2) + 395)  
 
-
 velikost_policka = 40
 Herni_okno_X = 1400
 Herni_okno_Y = 800
@@ -32,13 +26,8 @@ Herni_okno = pygame.Surface((Herni_okno_X, Herni_okno_Y))
 background_herni = pygame.image.load("background_herni_image.jpg")
 background_herni = pygame.transform.scale(background_herni, (Herni_okno_X, Herni_okno_Y))
 
-fps_casovac = pygame.time.Clock()
-fps = 60
-
-
-#(1 = zeď, 0 = volné pole)
+# (1 = zeď, 0 = volné pole)
 maze_lvl_1 = [
-     
  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -172,13 +161,9 @@ maze_lvl_3 = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1],
    
 ]
-
-
-maze_lvls = [maze_lvl_1, maze_lvl_2, maze_lvl_3, maze_lvl_4]
-
+maze_lvls = [maze_lvl_1, maze_lvl_2, maze_lvl_3]
 aktualni_lvl = 0
 maze = maze_lvls[aktualni_lvl]
-
 
 main_screen = True
 game_screen = False
@@ -227,6 +212,13 @@ def byla_kolize(nove_x, nove_y):
     
     return False  
 
+def zobraz_vizi(maze, player_x, player_y, radius= 0.5):
+    """Vykreslí omezenou vizi kolem hráče, která zobrazuje pouze chodby (0)"""
+    for radky in range(player_y - radius, player_y + radius + 1):
+        for sloupce in range(player_x - radius, player_x + radius + 1):
+            if 0 <= radky < len(maze) and 0 <= sloupce < len(maze[radky]):
+                if maze[radky][sloupce] == 1:  # Zobrazíme pouze stenu 
+                    pygame.draw.rect(Herni_okno, GREEN, (sloupce * velikost_policka, radky * velikost_policka, velikost_policka, velikost_policka))  # Chodba
 
 smycka = True
 while smycka:
@@ -234,8 +226,6 @@ while smycka:
         if event.type == QUIT:
             smycka = False
             
-        fps_casovac.tick(fps)
-
         if event.type == MOUSEBUTTONDOWN:
             if quit_button_rect.collidepoint(event.pos):  
                 smycka = False  
@@ -251,15 +241,10 @@ while smycka:
 
     if game_screen:
         Herni_okno.fill(GREEN)  
-
-      
         Herni_okno.blit(background_herni, (0, 0))
-        
 
-        for radky in range(len(maze)):
-            for sloupce in range(len(maze[radky])):
-                if maze[radky][sloupce] == 1:
-                    pygame.draw.rect(Herni_okno, BLACK, (sloupce * velikost_policka, radky * velikost_policka, velikost_policka, velikost_policka))
+        
+        zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=5)  # 5 je poloměr viditelné oblasti
 
         
         keys = pygame.key.get_pressed()
@@ -280,12 +265,10 @@ while smycka:
         Herni_okno.blit(Hrac_textura, (Hrac_X, Hrac_Y))
 
         check_level_complete()
-        
-        
-        
+
         Obraz.blit(Herni_okno, (Hlavni_screen_X // 2 - Herni_okno_X // 2, Hlavni_screen_Y // 2 - Herni_okno_Y // 2))
-        
     
     pygame.display.update()
 
 pygame.quit()
+
