@@ -212,10 +212,10 @@ def byla_kolize(nove_x, nove_y):
     
     return False  
 
-def zobraz_vizi(maze, player_x, player_y, radius= 0.5):
+def zobraz_vizi(maze, player_x, player_y, radius= 0):
     """Vykreslí omezenou vizi kolem hráče, která zobrazuje pouze chodby (0)"""
-    for radky in range(player_y - radius, player_y + radius + 1):
-        for sloupce in range(player_x - radius, player_x + radius + 1):
+    for radky in range(player_y - radius, player_y + radius + 0):
+        for sloupce in range(player_x - radius, player_x + radius + 0):
             if 0 <= radky < len(maze) and 0 <= sloupce < len(maze[radky]):
                 if maze[radky][sloupce] == 1:  # Zobrazíme pouze stenu 
                     pygame.draw.rect(Herni_okno, GREEN, (sloupce * velikost_policka, radky * velikost_policka, velikost_policka, velikost_policka))  # Chodba
@@ -244,7 +244,7 @@ while smycka:
         Herni_okno.blit(background_herni, (0, 0))
 
         
-        zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=5)  # 5 je poloměr viditelné oblasti
+        zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=3)  # 5 je poloměr viditelné oblasti
 
         
         keys = pygame.key.get_pressed()
