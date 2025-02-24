@@ -21,7 +21,7 @@ def play_music():
     pygame.mixer.music.play(-1)  
     pred_song = song  
 
-# Spuštění hudby na začátku
+
 play_music()
 
 # Timer pro změnu soundtracku každé 2 minuty (120 000 ms)
