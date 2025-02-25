@@ -32,6 +32,7 @@ Hlavni_screen_Y = 1080
 
 BLACK = (0, 0, 0)  # Barva stěn
 GREEN = (0, 0, 0)  # Barva pozadí
+BROWN=(169,66,19) #casovac
 
 Background_menu = pygame.image.load('background.jpg')
 Obraz = pygame.display.set_mode((Hlavni_screen_X, Hlavni_screen_Y))
@@ -54,7 +55,7 @@ background_herni = pygame.transform.scale(background_herni, (Herni_okno_X, Herni
 
 maze_lvl_1 = [
  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
 [1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
 [1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
 [1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
@@ -74,11 +75,7 @@ maze_lvl_1 = [
 [1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1],
 [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 2, 1],
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-
-    
-
 ]
-
 maze_lvl_2 = [
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1 ,1],
 [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 ,1],
@@ -100,9 +97,7 @@ maze_lvl_2 = [
 [1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1 ,1],
 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 2 ,1],
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    
-    ]
-
+ ]
 maze_lvl_3 = [
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1],
 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 ,0,1],
@@ -125,9 +120,7 @@ maze_lvl_3 = [
 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,1],
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 2, 1, 0, 1, 1, 1, 1, 1 ,1],
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1],
-   
 ]
-
 maze_lvl_4 =[
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1],
 [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,1,0,0,0,0,0,0],
@@ -149,7 +142,6 @@ maze_lvl_4 =[
 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1,1],
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 2, 0, 0, 1, 0, 0, 0,1],
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,1],
-    
 ]
 maze_lvls = [maze_lvl_1, maze_lvl_2, maze_lvl_3, maze_lvl_4]
 aktualni_lvl = 0
@@ -194,11 +186,10 @@ def check_level_complete():
             start_time = time.time()
             
 def byla_kolize(nove_x, nove_y):
-    """Zkontroluje, zda hráč narazí do zdi"""
     body_ke_kontrole  = [         
         (nove_x, nove_y),  
         (nove_x + Hrac_velikost - 1, nove_y),  
-        (nove_x, nove_y + Hrac_velikost - 1),  
+        (nove_x, nove_y + Hrac_velikost - 1),                                     #konrola kolizi, zed
         (nove_x + Hrac_velikost - 1, nove_y + Hrac_velikost - 1)  
     ]
 
@@ -210,10 +201,9 @@ def byla_kolize(nove_x, nove_y):
     return False  
 
 def zobraz_vizi(maze, player_x, player_y, radius=0):
-    """Vykreslí omezenou vizi kolem hráče, která zobrazuje pouze chodby (0)"""
     for radky in range(player_y - radius, player_y + radius + 0):
         for sloupce in range(player_x - radius, player_x + radius + 0):
-            if 0 <= radky < len(maze) and 0 <= sloupce < len(maze[radky]):
+            if 0 <= radky < len(maze) and 0 <= sloupce < len(maze[radky]):                              #vykresleni omezene vize
                 if maze[radky][sloupce] == 1:  
                     pygame.draw.rect(Herni_okno, GREEN, (sloupce * velikost_policka, radky * velikost_policka, velikost_policka, velikost_policka))  
                 elif maze[radky][sloupce] == 2:  
@@ -252,7 +242,7 @@ while smycka:
         
         elapsed_time = time.time() - start_time
         
-        time_text = font.render(f"Time: {int(elapsed_time)}s", True, (0, 255, 255))
+        time_text = font.render(f"Time: {int(elapsed_time)}s", True, (BROWN))
         Herni_okno.blit(time_text, (10,10)) 
 
         zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=3)  #tady je viditelnost
@@ -263,7 +253,7 @@ while smycka:
         if keys[K_w]:
             new_y -= Hrac_speed
         if keys[K_s]:
-            new_y += Hrac_speed
+            new_y += Hrac_speed                #movement
         if keys[K_a]:
             new_x -= Hrac_speed
         if keys[K_d]:
