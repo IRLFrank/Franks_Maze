@@ -34,7 +34,7 @@ GREEN = (0, 0, 0)  # Barva pozadí
 BROWN=(169,66,19) #casovac
 
 
-Background_menu = pygame.image.load('background.webp')
+Background_menu = pygame.image.load('background.png')
 image_width, image_height = Background_menu.get_size()
 pomer_stran = image_width / image_height
 # Nové rozměry, které zachovají poměr stran a přizpůsobí obrázek obrazovce
@@ -62,7 +62,7 @@ velikost_policka = 40
 Herni_okno_X = 1400
 Herni_okno_Y = 800
 Herni_okno = pygame.Surface((Herni_okno_X, Herni_okno_Y))
-background_herni = pygame.image.load("background_herni_image.webp")
+background_herni = pygame.image.load("background_herni_image.png")
 background_herni = pygame.transform.scale(background_herni, (Herni_okno_X, Herni_okno_Y))
 
 maze_lvl_1 = [
