@@ -34,7 +34,7 @@ BLACK = (0, 0, 0)  # Barva stěn
 GREEN = (0, 0, 0)  # Barva pozadí
 BROWN=(169,66,19) #casovac
 
-Background_menu = pygame.image.load('background.jpg')
+Background_menu = pygame.image.load('background.webp')
 Obraz = pygame.display.set_mode((Hlavni_screen_X, Hlavni_screen_Y))
 
 start_button = pygame.image.load('start_button.png')
