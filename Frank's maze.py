@@ -21,7 +21,6 @@ def play_music():
     pygame.mixer.music.play(-1)  
     pred_song = song  
 
-
 play_music()
 
 # Timer pro změnu soundtracku každé 2 minuty (120 000 ms)
@@ -34,10 +33,23 @@ BLACK = (0, 0, 0)  # Barva stěn
 GREEN = (0, 0, 0)  # Barva pozadí
 BROWN=(169,66,19) #casovac
 
+
 Background_menu = pygame.image.load('background.webp')
+image_width, image_height = Background_menu.get_size()
+pomer_stran = image_width / image_height
+# Nové rozměry, které zachovají poměr stran a přizpůsobí obrázek obrazovce
+if Hlavni_screen_X / Hlavni_screen_Y > pomer_stran:
+    new_width = int(Hlavni_screen_Y * pomer_stran)
+    new_height = Hlavni_screen_Y
+else:
+    new_width = Hlavni_screen_X                                             #menu image
+    new_height = int(Hlavni_screen_X / pomer_stran)
+Backgroundcele = pygame.transform.scale(Background_menu, (new_width, new_height))
+center_x = (Hlavni_screen_X - new_width) // 2
+center_y = (Hlavni_screen_Y - new_height) // 2
 Obraz = pygame.display.set_mode((Hlavni_screen_X, Hlavni_screen_Y))
 
-start_button = pygame.image.load('start_button.png')
+start_button = pygame.image.load('start_button.png')    
 quit_button = pygame.image.load('quit_button.png')
 
 start_button_rect = start_button.get_rect()
@@ -50,7 +62,7 @@ velikost_policka = 40
 Herni_okno_X = 1400
 Herni_okno_Y = 800
 Herni_okno = pygame.Surface((Herni_okno_X, Herni_okno_Y))
-background_herni = pygame.image.load("background_herni_image.jpg")
+background_herni = pygame.image.load("background_herni_image.webp")
 background_herni = pygame.transform.scale(background_herni, (Herni_okno_X, Herni_okno_Y))
 
 maze_lvl_1 = [
@@ -186,10 +198,10 @@ def check_level_complete():
             start_time = time.time()
             
 def byla_kolize(nove_x, nove_y):
-    body_ke_kontrole  = [         
+    body_ke_kontrole = [         
         (nove_x, nove_y),  
         (nove_x + Hrac_velikost - 1, nove_y),  
-        (nove_x, nove_y + Hrac_velikost - 1),                                     #konrola kolizi, zed
+        (nove_x, nove_y + Hrac_velikost - 1),                                     #kontrola kolize, zeď
         (nove_x + Hrac_velikost - 1, nove_y + Hrac_velikost - 1)  
     ]
 
@@ -203,7 +215,7 @@ def byla_kolize(nove_x, nove_y):
 def zobraz_vizi(maze, player_x, player_y, radius=0):
     for radky in range(player_y - radius, player_y + radius + 0):
         for sloupce in range(player_x - radius, player_x + radius + 0):
-            if 0 <= radky < len(maze) and 0 <= sloupce < len(maze[radky]):                              #vykresleni omezene vize
+            if 0 <= radky < len(maze) and 0 <= sloupce < len(maze[radky]):                              #vykreslení omezené vize
                 if maze[radky][sloupce] == 1:  
                     pygame.draw.rect(Herni_okno, GREEN, (sloupce * velikost_policka, radky * velikost_policka, velikost_policka, velikost_policka))  
                 elif maze[radky][sloupce] == 2:  
@@ -229,7 +241,7 @@ while smycka:
             play_music()  
 
     if main_screen:
-        Obraz.blit(Background_menu, (0, 0))
+        Obraz.blit(Backgroundcele, (center_x, center_y))  # Použití pozadí na celou obrazovku
         Obraz.blit(start_button, start_button_rect.topleft)
         Obraz.blit(quit_button, quit_button_rect.topleft)
 
@@ -245,7 +257,7 @@ while smycka:
         time_text = font.render(f"Time: {int(elapsed_time)}s", True, (BROWN))
         Herni_okno.blit(time_text, (10,10)) 
 
-        zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=3)  #tady je viditelnost
+        zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=3)  # Tady je viditelnost
 
         keys = pygame.key.get_pressed()
         new_x, new_y = Hrac_X, Hrac_Y  
@@ -253,7 +265,7 @@ while smycka:
         if keys[K_w]:
             new_y -= Hrac_speed
         if keys[K_s]:
-            new_y += Hrac_speed                #movement
+            new_y += Hrac_speed                # movement
         if keys[K_a]:
             new_x -= Hrac_speed
         if keys[K_d]:
@@ -270,5 +282,5 @@ while smycka:
     
     pygame.display.update()
 
-pygame.quit()  
+pygame.quit()
 
