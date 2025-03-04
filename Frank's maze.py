@@ -25,7 +25,7 @@ def play_music():
 play_music()
 
 # Timer pro změnu soundtracku každé 2 minuty (120 000 ms)
-pygame.time.set_timer(pygame.USEREVENT, 120000)
+pygame.time.set_timer(pygame.USEREVENT, 180000)
 
 
 #---------------------------------------------------------------------------------------#
@@ -63,6 +63,12 @@ Obraz = pygame.display.set_mode((Hlavni_screen_X, Hlavni_screen_Y))
 
 
 #---------------------------------------------------------------------------------------#
+
+
+end_screen_image = pygame.image.load("END.png")
+end_screen_image = pygame.transform.scale(end_screen_image, (1400, 790))
+
+
 
 
 start_button = pygame.image.load('start_button.png')    
@@ -136,32 +142,40 @@ mapa_zobrazena = False
 text_dungeonu = font.render("Našel jsi mapu dungeonu!", True, (255, 255, 255))  
 aktivovane_barel = set()
 
-Dokoncena_hra = False
-text_end = font.render("Konečně si venku! Tak tady končí tvoje dobrodružsví.", True, (0, 0, 255))
-
-
 #---------------------------------------------------------------------------------------#
+end_screen_shown = False
+dokoncenych_levelu = 0
 
 def check_level_complete():
-    global aktualni_lvl, maze, Hrac_X, Hrac_Y, main_screen, game_screen, start_time, Dokoncena_hra
+    global aktualni_lvl, maze, Hrac_X, Hrac_Y, main_screen, game_screen, start_time, dokoncenych_levelu, end_screen_shown
+    
+    misto_x = (len(maze[0]) - 2) * velikost_policka
+    misto_y = (len(maze) - 2) * velikost_policka
 
-    if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 2:  # Cíl levelu
-        if aktualni_lvl + 1 < len(maze_lvls):  # Pokud nejsme na poslední úrovni
-            aktualni_lvl += 1  # Přechod na další úroveň
-            maze = maze_lvls[aktualni_lvl]
-            Hrac_X, Hrac_Y = 40, 40  # Pozice hráče na začátku úrovně
-            start_time = time.time()  # Restart časovače
-        else:
-            # Pokud jsme na poslední úrovni, hra je dokončena
-            Dokoncena_hra = True
-            game_screen = False
-            pygame.time.delay(5000)  # Po 3 sekundách přejdeme zpět na hlavní obrazovku
-            main_screen = True
-            aktualni_lvl = 0  # Reset úrovně
+    if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 2:
+        dokoncenych_levelu += 1
+        if aktualni_lvl + 1 < len(maze_lvls):
+            aktualni_lvl += 1
             maze = maze_lvls[aktualni_lvl]
             Hrac_X, Hrac_Y = 40, 40
-            start_time = time.time()  # Restart časovače
+            start_time = time.time()
+        else:
+            end_screen_shown = True 
+            game_screen = False 
+           
+
+def zobrazit_informace(herni_okno, font, aktualni_lvl, dokoncenych_levelu):
+    level_text = font.render(f"Level: {aktualni_lvl + 1}", True, BROWN)
+    herni_okno.blit(level_text, (100, 10))
             
+def zobrazit_end_screen():
+    global end_screen_shown
+    if end_screen_shown:
+        Obraz.blit(end_screen_image, ( 290, 140 ))
+        pygame.display.update()
+
+        
+          
 #---------------------------------------------------------------------------------------#
             
             
@@ -232,52 +246,39 @@ clock = pygame.time.Clock()
 
 
 #---------------------------------------------------------------------------------------#
-
-
+# Hlavní smyčka
 while smycka:
     for event in pygame.event.get():
         if event.type == QUIT:
             smycka = False
             
         if event.type == MOUSEBUTTONDOWN:
-            if quit_button_rect.collidepoint(event.pos):  
-                smycka = False  
+            if quit_button_rect.collidepoint(event.pos):
+                smycka = False
             
             if start_button_rect.collidepoint(event.pos):
-                game_screen = True  
+                game_screen = True
                 main_screen = False
         
-        if event.type == pygame.USEREVENT:  
-            play_music()  
+        if event.type == pygame.USEREVENT:
+            play_music()
 
     if main_screen:
-        Obraz.blit(Backgroundcele, (center_x, center_y))  
+        Obraz.blit(Backgroundcele, (center_x, center_y))
         Obraz.blit(start_button, start_button_rect.topleft)
         Obraz.blit(quit_button, quit_button_rect.topleft)
 
     if game_screen:
         Herni_okno.fill(GREEN)
-        
-        
         current_background = background_lvls[aktualni_lvl]
-        current_background = pygame.transform.scale(current_background, (Herni_okno_X, Herni_okno_Y))  
-        Herni_okno.blit(current_background, (0, 0))  
+        current_background = pygame.transform.scale(current_background, (Herni_okno_X, Herni_okno_Y))
+        Herni_okno.blit(current_background, (0, 0))
 
         if start_time is None:
             start_time = time.time()
-        
-        elapsed_time = time.time() - start_time
-        
-        time_text = font.render(f"Time: {int(elapsed_time)}s", True, (BROWN))
-        Herni_okno.blit(time_text, (10,10))  #herni cas
 
-        zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=3)#radius vize
-
-        check_barrel()  #barel
-        
-        
-#---------------------------------------------------------------------------------------#
-        
+        zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=3)
+        check_barrel()
         
         keys = pygame.key.get_pressed()
         new_x, new_y = Hrac_X, Hrac_Y
@@ -293,37 +294,27 @@ while smycka:
 
         if not byla_kolize(new_x, new_y):
             Hrac_X, Hrac_Y = new_x, new_y
-
-
-#---------------------------------------------------------------------------------------#
-            
-            
+        
         Herni_okno.blit(Hrac_textura, (Hrac_X, Hrac_Y))
+        check_level_complete()  
+        zobrazit_informace(Herni_okno, font, aktualni_lvl ,dokoncenych_levelu)  
 
-        check_level_complete()#byl dokoncen lvl
-
-#---------------------------------------------------------------------------------------#
         if mapa_zobrazena:
             zobrazit_celou_mapu(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=0)
 
         if mapa_zobrazena:
-            Herni_okno.blit(text_dungeonu, (Herni_okno_X // 2 - text_dungeonu.get_width() // 2, Herni_okno_Y // 2 - 100))#souradnice nalezeni mapy
-
+            Herni_okno.blit(text_dungeonu, (Herni_okno_X // 2 - text_dungeonu.get_width() // 2, Herni_okno_Y // 2 - 100))
 
         if mapa_zobrazena and time.time() - start_time > 3:
             mapa_zobrazena = False
-            
-            
-            
-            
-#---------------------------------------------------------------------------------------#
-
 
         Obraz.blit(Herni_okno, (Hlavni_screen_X // 2 - Herni_okno_X // 2, Hlavni_screen_Y // 2 - Herni_okno_Y // 2))
-    
-    pygame.display.update()
 
-    clock.tick(60)  # 60 FPS
+    # Zobrazení end screen
+    if end_screen_shown:
+        zobrazit_end_screen()
+
+    pygame.display.update()
+    clock.tick(60)
 
 pygame.quit()
-
