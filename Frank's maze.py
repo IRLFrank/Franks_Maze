@@ -28,7 +28,64 @@ hraj_hudbu()
 # Timer pro změnu soundtracku každé 2 minuty (120 000 ms)
 pygame.time.set_timer(pygame.USEREVENT, 180000)
 death_sound = pygame.mixer.Sound('UDIED.mp3')  
+walk_sound = pygame.mixer.Sound('walk.mp3')
+hit_sound = pygame.mixer.Sound('hit.mp3')
+mapamizeni = pygame.mixer.Sound("mapamizeni.mp3")
+Victory_sound = pygame.mixer.Sound("victory.mp3")
 
+
+walk_sound_playing = False  
+hit_sound_playing = False   
+barrel_step_time = None
+victory_sound_playing = False  
+victory_sound_played_at = None  
+
+
+def check_walk_sound():
+    global walk_sound_playing
+    keys = pygame.key.get_pressed()
+    if keys[K_w] or keys[K_s] or keys[K_a] or keys[K_d]:
+        if not walk_sound_playing:  
+            walk_sound.play(loops=-1, maxtime=0)
+            walk_sound_playing = True
+    else:
+        if walk_sound_playing:  
+            walk_sound.stop()  
+            walk_sound_playing = False
+
+
+def check_hit_sound():
+    global hit_sound_playing, HP
+    if HP < 3:  
+        if not hit_sound_playing:  
+            hit_sound.play()  
+            hit_sound_playing = True
+    else:
+        hit_sound_playing = False  
+
+
+def check_barrel():
+    global barrel_step_time
+    if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 5:  
+        if barrel_step_time is None:  
+            barrel_step_time = time.time()  
+
+def check_barrel_sound():
+    global barrel_step_time
+    if barrel_step_time is not None:  
+        if time.time() - barrel_step_time >= 3:  
+            mapamizeni.play()  
+            barrel_step_time = None
+            
+victory_played = False
+
+# Funkce pro přehrání zvuku při vítězství
+def play_victory_sound():
+    global victory_played
+    if not victory_played:
+        Victory_sound.play()
+        victory_played = True
+            
 #---------------------------------------------------------------------------------------#
 HP = 8  #pocet hp hrace
 
@@ -270,7 +327,7 @@ def zobraz_vizi(maze, player_x, player_y, radius=0):
                     exit_image = pygame.image.load('cil.png')
                     exit_image = pygame.transform.scale(exit_image, (velikost_policka, velikost_policka))
                     Herni_okno.blit(exit_image, (sloupce * velikost_policka, radky * velikost_policka))
-                elif maze[radky][sloupce] == 4:  # Zpětné dveře
+                elif maze[radky][sloupce] == 4:  
                     backdoor_image = pygame.image.load('cil.png')  
                     backdoor_image = pygame.transform.scale(backdoor_image, (velikost_policka, velikost_policka))
                     Herni_okno.blit(backdoor_image, (sloupce * velikost_policka, radky * velikost_policka))  
@@ -280,17 +337,28 @@ def zobraz_vizi(maze, player_x, player_y, radius=0):
                     Herni_okno.blit(barrel_image, (sloupce * velikost_policka, radky * velikost_policka))
 
 #---------------------------------------------------------------------------------------#
-                    
+aktivovane_barel = set()  
+start_time = None  
+mapa_zobrazena = False                    
                     
 def check_barrel():
     global start_time, mapa_zobrazena
     barel_x, barel_y = Hrac_X // velikost_policka, Hrac_Y // velikost_policka
     
+    
     if maze[barel_y][barel_x] == 5 and (barel_x, barel_y) not in aktivovane_barel:
         aktivovane_barel.add((barel_x, barel_y))  
         start_time = time.time()  
         mapa_zobrazena = True  
-        text_dungeonu = font.render("Našel jsi mapu dungeonu!", True, (255, 255, 255))  
+        text_dungeonu = font.render("Našel jsi mapu dungeonu!", True, (255, 255, 255))
+        
+def check_map_reset():
+    global start_time, mapa_zobrazena
+    
+    
+    if mapa_zobrazena and start_time is not None and time.time() - start_time >= 3:
+        mapa_zobrazena = False  #
+        start_time = None  
              
 def zobrazit_celou_mapu(maze, player_x, player_y, radius=0):
     for radky in range(len(maze)):
@@ -434,7 +502,7 @@ while smycka:
         Obraz.blit(Backgroundcele, (center_x, center_y))
         Obraz.blit(start_button, start_button_rect.topleft)
         Obraz.blit(quit_button, quit_button_rect.topleft)
-
+    
     if game_screen:
         if not player_dead:
             Herni_okno.fill(GREEN)
@@ -446,36 +514,55 @@ while smycka:
                 start_time = time.time()
 
             zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=3)
+            check_map_reset()
             check_barrel()
 
             # Ovládání hráče
             keys = pygame.key.get_pressed()
             new_x, new_y = Hrac_X, Hrac_Y
+            moving = False
 
             if keys[K_w]:
                 new_y -= Hrac_rychlost_enemy
+                moving = True
             if keys[K_s]:
                 new_y += Hrac_rychlost_enemy
+                moving = True
             if keys[K_a]:
                 new_x -= Hrac_rychlost_enemy
+                moving = True
             if keys[K_d]:
                 new_x += Hrac_rychlost_enemy
-
+                moving = True
+            
             if not byla_kolize(new_x, new_y):
                 Hrac_X, Hrac_Y = new_x, new_y
 
             Herni_okno.blit(Hrac_textura, (Hrac_X, Hrac_Y))
 
             check_level_complete()
-            check_for_backdoor()  
+            check_for_backdoor()
+            if moving:
+                if not walk_sound_playing:
+                    walk_sound.play(loops=-1, maxtime=0)  
+                    walk_sound_playing = True
+            else:
+                if walk_sound_playing:
+                    walk_sound.stop()  
+                    walk_sound_playing = False
 
             zobrazit_informace(Herni_okno, font, aktualni_lvl, dokoncenych_levelu)
-
+            
+            if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 5:
+                if barrel_step_time is None:  
+                    barrel_step_time = time.time()  
+                    
             if mapa_zobrazena:
                 zobrazit_celou_mapu(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=0)
 
-            if mapa_zobrazena and time.time() - start_time > 3:
-                mapa_zobrazena = False
+            if barrel_step_time is not None and time.time() - barrel_step_time >= 3:
+                mapamizeni.play()  
+                barrel_step_time = None  
                 
             if mapa_zobrazena:  
                 Herni_okno.blit(text_dungeonu, (1000, 0))
@@ -502,12 +589,16 @@ while smycka:
                 if abs(enemy.x - Hrac_X) < velikost_policka and abs(enemy.y - Hrac_Y) < velikost_policka:
                     print("Nepřítel zasáhl hráče! Odebrání nepřítele.")
                     HP -= 1
+                    hit_sound.play()
                     to_remove.append(enemy)
 
                     if HP <= 0:
                         player_dead = True
+                        walk_sound.stop()
+                        death_sound.play()
+                        mapamizeni.stop()
+                        hit_sound.stop()
                         death_time = pygame.time.get_ticks()
-                        death_sound.play()  
 
             for enemy in to_remove:
                 if enemy in enemies:
@@ -515,13 +606,12 @@ while smycka:
 
             # 🩸 ***Vykreslení health baru*** 🩸
             vykresli_zivoty(Herni_okno)
-
             Obraz.blit(Herni_okno, (Hlavni_screen_X // 2 - Herni_okno_X // 2, Hlavni_screen_Y // 2 - Herni_okno_Y // 2))
 
         else:
-            Obraz.blit(death_screen, (290,140))
+            Obraz.blit(death_screen, (290, 140))
 
-            if pygame.time.get_ticks() - death_time > 4000:  #kolik sekund so resetovani hry
+            if pygame.time.get_ticks() - death_time > 4000:  #kolik sekund do resetování hry po konci
                 game_screen = False
                 main_screen = True
                 player_dead = False
@@ -530,7 +620,8 @@ while smycka:
 
     if end_screen_shown:
         zobrazit_end_screen()
-
+        play_victory_sound()
+        
     pygame.display.update()
     clock.tick(60)
 
