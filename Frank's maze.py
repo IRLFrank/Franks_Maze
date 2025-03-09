@@ -88,19 +88,16 @@ def play_victory_sound():
         Victory_sound.play()
         victory_played = True
 #---------------------------------------------------------------------------------------#
-import pygame
-
-# Maximální HP hráče
 MAX_HP = 8
 HP = MAX_HP
 medkits = []
-# Obrázky pro srdce
+
 heart_full = pygame.image.load("heart_full.png")
 heart_empty = pygame.image.load("heart_empty.png")
 heart_full = pygame.transform.scale(heart_full, (45, 45))
 heart_empty = pygame.transform.scale(heart_empty, (45, 45))
 
-# Obrázek medkitu
+
 medkit_image = pygame.image.load("medkit.png")
 medkit_image = pygame.transform.scale(medkit_image, (25, 25))
 
@@ -159,6 +156,8 @@ menu_bg = pygame.image.load('ABBYS.png')
 menu_bg_rect = menu_bg.get_rect()
 menu_bg_rect.center = (Hlavni_screen_X // 2, (Hlavni_screen_Y // 2) - 280)
 
+klic_image = pygame.image.load('klic.png')
+klic_image = pygame.transform.scale(klic_image, (velikost_policka, velikost_policka))
 
 end_screen_image = pygame.image.load("END.png")
 end_screen_image = pygame.transform.scale(end_screen_image, (1400, 790))
@@ -202,7 +201,8 @@ maze_lvls = [
     load_maze_from_file("level1.txt"), 
     load_maze_from_file("level2.txt"), 
     load_maze_from_file("level3.txt"),        
-    load_maze_from_file("level4.txt")
+    load_maze_from_file("level4.txt"),
+    load_maze_from_file("secret.txt")  # Tajemný level
 ]
 
 aktualni_lvl = 0
@@ -228,13 +228,12 @@ Hrac_textura = pygame.transform.scale(Hrac_textura, (Hrac_velikost, Hrac_velikos
 
 start_time = None  
 uplynulicas = 0
-
+ma_klic = False  # Na začátku hráč klíč nemá
 
 #---------------------------------------------------------------------------------------#
 
 mapa_zobrazena = False
 text_dungeonu = font.render("Našel jsi mapu dungeonu!", True, (BROWN))
-text_fire = font.render("Shořela ti mapa", True, (BROWN))
 Herni_okno.blit(text_dungeonu, (100, 100))  
 aktivovane_barel = set()
 
@@ -243,13 +242,14 @@ end_screen_shown = False
 dokoncenych_levelu = 0
 
 def check_level_complete():
-    global aktualni_lvl, maze, Hrac_X, Hrac_Y, main_screen, game_screen, start_time, dokoncenych_levelu, end_screen_shown, saved_position_x, saved_position_y
+    global aktualni_lvl, maze, Hrac_X, Hrac_Y, main_screen, game_screen, start_time, dokoncenych_levelu, end_screen_shown, saved_position_x, saved_position_y, ma_klic
     
     misto_x = (len(maze[0]) - 2) * velikost_policka
     misto_y = (len(maze) - 2) * velikost_policka
 
+    # Kontrola pro standardní dveře do další úrovně
     if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 2:
-        saved_position_x, saved_position_y = Hrac_X, Hrac_Y  
+        saved_position_x, saved_position_y = Hrac_X, Hrac_Y
         dokoncenych_levelu += 1
         if aktualni_lvl + 1 < len(maze_lvls):
             door_sound.play()
@@ -265,14 +265,34 @@ def check_level_complete():
         else:
             end_screen_shown = True 
             game_screen = False
+
+    # Kontrola pro dveře do tajemné místnosti (level 9)
+    elif maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 9 and ma_klic:
+        door_sound.play()  # Zvuk dveří
+        nacti_novy_level()  # Načti tajemný level
+
+    # Kontrola pro zpětné dveře (level 4)
     elif maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 4:
         door_sound.play()
-        aktualni_lvl -= 1  
+        aktualni_lvl -= 1  # Vrátí hráče na předchozí level
         maze = maze_lvls[aktualni_lvl]
         Hrac_X, Hrac_Y = saved_position_x, saved_position_y
         Hrac_X -= 30
         Hrac_Y -= 0
         start_time = time.time()
+
+def nacti_novy_level():
+    global maze, aktualni_lvl
+    aktualni_lvl = 4  # Index pro tajemný level (5. level)
+    maze = maze_lvls[aktualni_lvl]  # Načteme tajemný level
+    Hrac_X, Hrac_Y = start_position_of_secret_level()  # Výchozí pozice hráče pro tajemný level
+    start_time = time.time()  # Obnovení času pro nový level
+    enemies.clear()  # Vymažeme předchozí nepřátele
+    enemies.extend(load_enemies(maze))  # Načteme nepřátele pro tajemný level
+
+def start_position_of_secret_level():
+    return (40, 40)  # Příklad: Začátek na pozici (40, 40)
+
         
 def check_for_backdoor():
     global aktualni_lvl, maze, Hrac_X, Hrac_Y, start_time, saved_position_x, saved_position_y 
@@ -343,15 +363,23 @@ def zobraz_vizi(maze, player_x, player_y, radius=0):
                     barrel_image = pygame.transform.scale(barrel_image, (velikost_policka, velikost_policka))
                     Herni_okno.blit(barrel_image, (sloupce * velikost_policka, radky * velikost_policka))
                 elif maze[radky][sloupce] == 7:  # Medkit
-                    Herni_okno.blit(medkit_image, (sloupce * velikost_policka + 10, radky * velikost_policka + 10))  
+                    Herni_okno.blit(medkit_image, (sloupce * velikost_policka + 10, radky * velikost_policka + 10))
+                elif maze[radky][sloupce] == 3:  # Klíč
+                    Herni_okno.blit(klic_image, (sloupce * velikost_policka + 10, radky * velikost_policka + 10))
+                elif maze[radky][sloupce] == 9:  # Dveře do tajemné místnosti
+                    secret_door_image = pygame.image.load('cil.png')  # Nahraď za svůj obrázek
+                    secret_door_image = pygame.transform.scale(secret_door_image, (velikost_policka, velikost_policka))
+                    Herni_okno.blit(secret_door_image, (sloupce * velikost_policka, radky * velikost_policka))
+
+
 
 
 #---------------------------------------------------------------------------------------#
 aktivovane_barel = set()  
 start_time = None  
 mapa_zobrazena = False
-text_fire_time = None
-                    
+dvere_pozice = None
+
 def check_barrel():
     global start_time, mapa_zobrazena
     barel_x, barel_y = Hrac_X // velikost_policka, Hrac_Y // velikost_policka
@@ -388,7 +416,6 @@ def zobrazit_celou_mapu(maze, player_x, player_y, radius=0):
                 Herni_okno.blit(barrel_image, (sloupce * velikost_policka, radky * velikost_policka))
             elif maze[radky][sloupce] == 7:  # Medkit
                  Herni_okno.blit(medkit_image, (sloupce * velikost_policka, radky * velikost_policka))
-# Hlavní smyčka
 smycka = True
 clock = pygame.time.Clock()
 #---------------------------------------------------------------------------------------#
@@ -419,7 +446,7 @@ class Enemy:
         else:
             self.y = next_y * velikost_policka
 
-        # Kontrola kolize s hráčem
+        
         if abs(self.x - Hrac_X) < velikost_policka and abs(self.y - Hrac_Y) < velikost_policka:
             enemies.remove(self)
 
@@ -564,6 +591,21 @@ while smycka:
             tile_y = Hrac_Y // velikost_policka
             if 0 <= tile_y < len(maze) and 0 <= tile_x < len(maze[0]):
                 zkontroluj_medkit(maze, tile_y, tile_x)
+                
+            if maze[tile_y][tile_x] == 3:  # Klíč
+                ma_klic = True  # Hráč získal klíč
+                maze[tile_y][tile_x] = 0  # Klíč zmizí z mapy
+                dvere_pozice = (tile_y, tile_x)  # Ulož pozici, kde byl klíč
+
+            if ma_klic and dvere_pozice is not None:
+                y, x = dvere_pozice  # Pozice, kde se objeví dveře
+                maze[y][x] = 9  # Změníme pozici na dveře
+
+            if maze[tile_y][tile_x] == 9 and ma_klic:
+                nacti_novy_level()  # Načtení nové místnosti nebo levelu
+
+
+
 
             if not byla_kolize(new_x, new_y):
                 Hrac_X, Hrac_Y = new_x, new_y
@@ -611,7 +653,7 @@ while smycka:
                 if distance_x <= 3 and distance_y <= 3:
                     enemy.draw(Herni_okno)
 
-            # 💀 ***Pohyb nepřátel a kontrola kolize*** 💀
+            #pohyb nepratel + kolize
             to_remove = []
 
             for enemy in enemies:
@@ -640,7 +682,7 @@ while smycka:
                 if enemy in enemies:
                     enemies.remove(enemy)
 
-            # 🩸 ***Vykreslení health baru*** 🩸
+            # vykresleni hp bar
             vykresli_zivoty(Herni_okno)
             Obraz.blit(Herni_okno, (Hlavni_screen_X // 2 - Herni_okno_X // 2, Hlavni_screen_Y // 2 - Herni_okno_Y // 2))
 
