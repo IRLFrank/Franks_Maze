@@ -27,23 +27,22 @@ hraj_hudbu()
 
 # Timer pro změnu soundtracku každé 2 minuty (120 000 ms)
 pygame.time.set_timer(pygame.USEREVENT, 180000)
-
+death_sound = pygame.mixer.Sound('UDIED.mp3')  
 
 #---------------------------------------------------------------------------------------#
-HP = 8  # Počet životů hráče
+HP = 8  #pocet hp hrace
 
 def vykresli_zivoty(herni_okno):
     global HP
-    max_zivoty = 8  # Maximální počet životů
-    x_vsesrdce = 10  # Počáteční pozice x pro první srdce
-    y_vsesrdce = 10  # Pozice y pro všechna srdce
+    max_zivoty = 8  # kolik srdci
+    x_vsesrdce = 500  # pocatecni x srdci
+    y_vsesrdce = 5  # pozice y srdci
 
     for i in range(max_zivoty):
         if i < HP:
-            herni_okno.blit(heart_full, (x_vsesrdce + i * 55, y_vsesrdce))  # Plné srdce
+            herni_okno.blit(heart_full, (x_vsesrdce + i * 55, y_vsesrdce))  
         else:
-            herni_okno.blit(heart_empty, (x_vsesrdce + i * 55, y_vsesrdce))  # Prázdné srdce
-
+            herni_okno.blit(heart_empty, (x_vsesrdce + i * 55, y_vsesrdce))  
 
 
 #---------------------------------------------------------------------------------------#
@@ -98,7 +97,7 @@ start_button = pygame.image.load('start_button.png')
 quit_button = pygame.image.load('quit_button.png')
 start_button_rect = start_button.get_rect()
 quit_button_rect = quit_button.get_rect()                       
-start_button_rect.topleft = ((Hlavni_screen_X - start_button_rect.width) // 2, (Hlavni_screen_Y // 2) - 0)  
+start_button_rect.topleft = ((Hlavni_screen_X - start_button_rect.width) // 2, (Hlavni_screen_Y // 2) + 100)  
 quit_button_rect.topleft = ((Hlavni_screen_X - quit_button_rect.width) // 2, (Hlavni_screen_Y // 2) + 395)
 
 
@@ -107,15 +106,13 @@ quit_button_rect.topleft = ((Hlavni_screen_X - quit_button_rect.width) // 2, (Hl
 
 # Načtení obrázků srdcí (50x50 px, neprůhledné)
 heart_full = pygame.image.load("heart_full.png")  # Plné srdce
-heart_half = pygame.image.load("heart_half.png")  # Poloviční srdce
 heart_empty = pygame.image.load("heart_empty.png")  # Prázdné srdce
 
-# Změna velikosti na 50x50 px (pro jistotu)
-heart_full = pygame.transform.scale(heart_full, (50, 50))
-heart_half = pygame.transform.scale(heart_half, (50, 50))
-heart_empty = pygame.transform.scale(heart_empty, (50, 50))
 
-# Počet životů hráče (max 8)
+heart_full = pygame.transform.scale(heart_full, (45, 45))
+heart_empty = pygame.transform.scale(heart_empty, (45, 45))
+
+# Počet životů 
 zivoty = 8
 
 
@@ -130,7 +127,8 @@ background_lvls = [
     pygame.image.load('Background_herni_image4.png')   
 ]
 
-death_screen = pygame.image.load("DIED.png")  # Ujisti se, že soubor existuje
+death_screen = pygame.image.load("DIED.png")  
+death_screen = pygame.transform.scale(death_screen, (Herni_okno_X, Herni_okno_Y))
 
 def load_maze_from_file(filename):
     maze = []
@@ -174,7 +172,8 @@ uplynulicas = 0
 #---------------------------------------------------------------------------------------#
 
 mapa_zobrazena = False
-text_dungeonu = font.render("Našel jsi mapu dungeonu!", True, (255, 255, 255))  
+text_dungeonu = font.render("Našel jsi mapu dungeonu!", True, (BROWN))
+Herni_okno.blit(text_dungeonu, (100, 100))  
 aktivovane_barel = set()
 
 #---------------------------------------------------------------------------------------#
@@ -182,21 +181,49 @@ end_screen_shown = False
 dokoncenych_levelu = 0
 
 def check_level_complete():
-    global aktualni_lvl, maze, Hrac_X, Hrac_Y, main_screen, game_screen, start_time, dokoncenych_levelu, end_screen_shown
+    global aktualni_lvl, maze, Hrac_X, Hrac_Y, main_screen, game_screen, start_time, dokoncenych_levelu, end_screen_shown, saved_position_x, saved_position_y
     
     misto_x = (len(maze[0]) - 2) * velikost_policka
     misto_y = (len(maze) - 2) * velikost_policka
 
     if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 2:
+        saved_position_x, saved_position_y = Hrac_X, Hrac_Y  
         dokoncenych_levelu += 1
         if aktualni_lvl + 1 < len(maze_lvls):
             aktualni_lvl += 1
             maze = maze_lvls[aktualni_lvl]
             Hrac_X, Hrac_Y = 40, 40
+            Hrac_X += 20  
+            Hrac_Y -= 0  
             start_time = time.time()
+            enemies.clear()  
+            enemies.extend(load_enemies(maze))
+            
         else:
             end_screen_shown = True 
-            game_screen = False 
+            game_screen = False
+    elif maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 4:
+        aktualni_lvl -= 1  
+        maze = maze_lvls[aktualni_lvl]
+        Hrac_X, Hrac_Y = saved_position_x, saved_position_y
+        Hrac_X -= 30
+        Hrac_Y -= 0
+        start_time = time.time()
+        
+def check_for_backdoor():
+    global aktualni_lvl, maze, Hrac_X, Hrac_Y, start_time, saved_position_x, saved_position_y 
+    if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 4:  
+        if aktualni_lvl - 1 >= 0:
+            aktualni_lvl -= 1
+            maze = maze_lvls[aktualni_lvl]  
+            Hrac_X, Hrac_Y = saved_position_x, saved_position_y
+            pygame.time.delay(100)
+            Hrac_X -= 1000
+            Hrac_Y -= 0
+            print(f"Po změně levelu: Hrac_X={Hrac_X}, Hrac_Y={Hrac_Y}")  # Debug výpis
+            start_time = time.time()  
+            enemies.clear()
+            enemies.extend(load_enemies(maze))
            
 
 def zobrazit_informace(herni_okno, font, aktualni_lvl, dokoncenych_levelu):
@@ -243,11 +270,14 @@ def zobraz_vizi(maze, player_x, player_y, radius=0):
                     exit_image = pygame.image.load('cil.png')
                     exit_image = pygame.transform.scale(exit_image, (velikost_policka, velikost_policka))
                     Herni_okno.blit(exit_image, (sloupce * velikost_policka, radky * velikost_policka))
+                elif maze[radky][sloupce] == 4:  # Zpětné dveře
+                    backdoor_image = pygame.image.load('cil.png')  
+                    backdoor_image = pygame.transform.scale(backdoor_image, (velikost_policka, velikost_policka))
+                    Herni_okno.blit(backdoor_image, (sloupce * velikost_policka, radky * velikost_policka))  
                 elif maze[radky][sloupce] == 5:  
                     barrel_image = pygame.image.load('barel.png')  
                     barrel_image = pygame.transform.scale(barrel_image, (velikost_policka, velikost_policka))
-                    Herni_okno.blit(barrel_image, (sloupce * velikost_policka, radky * velikost_policka))  
-
+                    Herni_okno.blit(barrel_image, (sloupce * velikost_policka, radky * velikost_policka))
 
 #---------------------------------------------------------------------------------------#
                     
@@ -259,7 +289,8 @@ def check_barrel():
     if maze[barel_y][barel_x] == 5 and (barel_x, barel_y) not in aktivovane_barel:
         aktivovane_barel.add((barel_x, barel_y))  
         start_time = time.time()  
-        mapa_zobrazena = True
+        mapa_zobrazena = True  
+        text_dungeonu = font.render("Našel jsi mapu dungeonu!", True, (255, 255, 255))  
              
 def zobrazit_celou_mapu(maze, player_x, player_y, radius=0):
     for radky in range(len(maze)):
@@ -286,13 +317,13 @@ class Enemy:
         self.path = []
 
     def move_towards(self):
-        if not self.path:  # Pokud nepřítel nemá žádnou cestu, nic nedělá
+        if not self.path:  
             return  
 
-        next_x, next_y = self.path.pop(0)  # Vezme další bod v cestě
+        next_x, next_y = self.path.pop(0)  
         rychlost_enemy = 1  # Nastav rychlost pohybu nepřítele
 
-        # Výpočet směru pohybu
+        
         smer_x = (next_x * velikost_policka - self.x)
         smer_y = (next_y * velikost_policka - self.y)
 
@@ -309,22 +340,22 @@ class Enemy:
         # Kontrola kolize s hráčem
         if abs(self.x - Hrac_X) < velikost_policka and abs(self.y - Hrac_Y) < velikost_policka:
             print("Nepřítel zasáhl hráče! Odebrání nepřítele.")
-            enemies.remove(self)  # Nepřítel zmizí
+            enemies.remove(self)
 
     def draw(self, screen):
         screen.blit(enemy_image, (self.x, self.y))
 
-# Funkce pro načtení nepřátel
-def load_enemies():
-    enemies = []  # Seznam nepřátel
+
+def load_enemies(maze):
+    enemies = []  
     for y in range(len(maze)):
         for x in range(len(maze[y])):
-            if maze[y][x] == 8:  # Pokud je to nepřítel
-                enemies.append(Enemy(x, y))  # Vytvoří instanci třídy Enemy
-    return enemies  # Vrátí seznam nepřátel
+            if maze[y][x] == 8:  
+                enemies.append(Enemy(x, y))  
+    return enemies  
 
-# Inicializace nepřátel
-enemies = load_enemies()
+
+enemies = load_enemies(maze)
 
 #---------------------------------------------------------------------------------------#
             
@@ -367,21 +398,21 @@ def astar(start, goal, maze):
 
 def reset_game():
     global HP, Hrac_X, Hrac_Y, enemies, aktualni_lvl, start_time, mapa_zobrazena
-    HP = 8  # Reset životů
-    Hrac_X, Hrac_Y = start_x, start_y  # Reset pozice hráče
-    enemies = load_enemies()  # Načtení nepřátel z mapy
-    aktualni_lvl = 0  # Reset úrovně na první
-    start_time = None  # Reset času startu
-    mapa_zobrazena = False  # Reset mapy
+    HP = 8  
+    Hrac_X, Hrac_Y = start_x, start_y  
+    enemies = load_enemies(maze_lvls[aktualni_lvl])  
+    aktualni_lvl = 0 
+    start_time = None  
+    mapa_zobrazena = False  
 
 
 #---------------------------------------------------------------------------------------#
 
-# Přidání proměnných pro sledování smrti
+
 player_dead = False
 death_time = None
 
-# Hlavní smyčka hry
+
 while smycka:
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -394,7 +425,7 @@ while smycka:
             if start_button_rect.collidepoint(event.pos):
                 game_screen = True
                 main_screen = False
-                reset_game()  # Když začne nová hra, vše se resetuje
+                reset_game()  
 
         if event.type == pygame.USEREVENT:
             hraj_hudbu()
@@ -436,6 +467,7 @@ while smycka:
             Herni_okno.blit(Hrac_textura, (Hrac_X, Hrac_Y))
 
             check_level_complete()
+            check_for_backdoor()  
 
             zobrazit_informace(Herni_okno, font, aktualni_lvl, dokoncenych_levelu)
 
@@ -444,12 +476,15 @@ while smycka:
 
             if mapa_zobrazena and time.time() - start_time > 3:
                 mapa_zobrazena = False
+                
+            if mapa_zobrazena:  
+                Herni_okno.blit(text_dungeonu, (1000, 0))
 
             for enemy in enemies:
                 distance_x = abs(enemy.x - Hrac_X) // velikost_policka
                 distance_y = abs(enemy.y - Hrac_Y) // velikost_policka
 
-                if distance_x <= 5 and distance_y <= 5:
+                if distance_x <= 3 and distance_y <= 3:
                     enemy.draw(Herni_okno)
 
             # 💀 ***Pohyb nepřátel a kontrola kolize*** 💀
@@ -459,7 +494,7 @@ while smycka:
                 enemy_grid_x, enemy_grid_y = enemy.x // velikost_policka, enemy.y // velikost_policka
                 player_grid_x, player_grid_y = Hrac_X // velikost_policka, Hrac_Y // velikost_policka
 
-                if abs(enemy_grid_x - player_grid_x) <= 5 and abs(enemy_grid_y - player_grid_y) <= 3:
+                if abs(enemy_grid_x - player_grid_x) <= 3 and abs(enemy_grid_y - player_grid_y) <= 3:
                     enemy.path = astar((enemy_grid_x, enemy_grid_y), (player_grid_x, player_grid_y), maze)
 
                 enemy.move_towards()
@@ -472,6 +507,7 @@ while smycka:
                     if HP <= 0:
                         player_dead = True
                         death_time = pygame.time.get_ticks()
+                        death_sound.play()  
 
             for enemy in to_remove:
                 if enemy in enemies:
@@ -482,10 +518,10 @@ while smycka:
 
             Obraz.blit(Herni_okno, (Hlavni_screen_X // 2 - Herni_okno_X // 2, Hlavni_screen_Y // 2 - Herni_okno_Y // 2))
 
-        else:  # Když je hráč mrtvý
-            Obraz.blit(death_screen, (0, 0))  # Zobrazení died.png
+        else:
+            Obraz.blit(death_screen, (290,140))
 
-            if pygame.time.get_ticks() - death_time > 6000:  # Po 6 sekundách přepnout na menu a restartovat hru
+            if pygame.time.get_ticks() - death_time > 4000:  #kolik sekund so resetovani hry
                 game_screen = False
                 main_screen = True
                 player_dead = False
