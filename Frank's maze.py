@@ -170,15 +170,21 @@ enemy_image = pygame.transform.scale(enemy_image, (velikost_policka, velikost_po
 death_screen = pygame.image.load("DIED.png")  
 death_screen = pygame.transform.scale(death_screen, (Herni_okno_X, Herni_okno_Y))
 
+lore_button = pygame.image.load('lore.png')
 start_button = pygame.image.load('start_button.png')    
 quit_button = pygame.image.load('quit_button.png')
+
+lore_button_rect = lore_button.get_rect() 
 start_button_rect = start_button.get_rect()
-quit_button_rect = quit_button.get_rect()                       
-start_button_rect.topleft = ((Hlavni_screen_X - start_button_rect.width) // 2, (Hlavni_screen_Y // 2) + 100)  
+quit_button_rect = quit_button.get_rect()
+
+lore_button_rect.topleft = ((Hlavni_screen_X - lore_button_rect.width) // 2, (Hlavni_screen_Y // 2)  -500)  
+start_button_rect.topleft = ((Hlavni_screen_X - start_button_rect.width) // 2, (Hlavni_screen_Y // 2) +100)  
 quit_button_rect.topleft = ((Hlavni_screen_X - quit_button_rect.width) // 2, (Hlavni_screen_Y // 2) + 395)
 
 
 
+lore_screen_active = False
 #---------------------------------------------------------------------------------------#
 
 
@@ -225,7 +231,7 @@ Hrac_X = start_x
 Hrac_Y = start_y  
 
 
-Hrac_rychlost = 5	
+Hrac_rychlost = 4	
 Hrac_textura = pygame.image.load('hrac.png')
 Hrac_textura = pygame.transform.scale(Hrac_textura, (Hrac_velikost, Hrac_velikost))    
 
@@ -464,7 +470,7 @@ def zobrazit_celou_mapu(maze, player_x, player_y, radius=0):
                 barrel_image = pygame.transform.scale(barrel_image, (velikost_policka, velikost_policka))
                 Herni_okno.blit(barrel_image, (sloupce * velikost_policka, radky * velikost_policka))
             elif maze[radky][sloupce] == 7:  # Medkit
-                 Herni_okno.blit(medkit_image, (sloupce * velikost_policka, radky * velikost_policka))
+                Herni_okno.blit(medkit_image, (sloupce * velikost_policka, radky * velikost_policka))
 smycka = True
 clock = pygame.time.Clock()
 #---------------------------------------------------------------------------------------#
@@ -477,7 +483,7 @@ class Enemy:
         if not self.path:  
             return  
         next_x, next_y = self.path.pop(0)  
-        rychlost_enemy = 3  # Nastav rychlost pohybu nepřítele
+        rychlost_enemy = 2  # Nastav rychlost pohybu nepřítele
         smer_x = (next_x * velikost_policka - self.x)
         smer_y = (next_y * velikost_policka - self.y)
         if abs(smer_x) > rychlost_enemy:
@@ -554,15 +560,14 @@ def zkontroluj_medkit(maze, Hrac_Y,Hrac_X):
     if maze[Hrac_Y][Hrac_X] == 7:  
         if HP < 8:  
             HP = min(HP + 2, 8)
-            print(f"Hráč získal 2 HP! Aktuální HP: {HP}")
             heal_sound.play()
         maze[Hrac_Y][Hrac_X] = 0
         
 def teleportace(novy_x, novy_y, novy_level_index):
     global Hrac_X, Hrac_Y, maze
-    Hrac_X, Hrac_Y = novy_x, novy_y  # Nastavíme novou pozici hráče
-    maze = maze_lvls[novy_level_index]  # Načteme nový level podle indexu
-    print(f"Teleportováno na: ({Hrac_X}, {Hrac_Y}), nový level index: {novy_level_index}")
+    Hrac_X, Hrac_Y = novy_x, novy_y  
+    maze = maze_lvls[novy_level_index]  
+    
 
 
 ohen_zobrazen = False
@@ -584,6 +589,14 @@ while smycka:
                 game_screen = True
                 main_screen = False
                 reset_game()
+                
+            if lore_button_rect.collidepoint(event.pos):  # Kliknutí na lore obrázek
+                lore_screen_active = True
+
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    lore_screen_active = False
+
 
         if event.type == pygame.USEREVENT:
             hraj_hudbu()
@@ -593,7 +606,7 @@ while smycka:
         Obraz.blit(menu_bg, menu_bg_rect.topleft)  
         Obraz.blit(start_button, start_button_rect.topleft)
         Obraz.blit(quit_button, quit_button_rect.topleft)
-        
+        Obraz.blit(lore_button, lore_button_rect.topleft)
 
     if game_screen:  
         if not player_dead:
@@ -610,8 +623,13 @@ while smycka:
             zobraz_vizi(maze, Hrac_X // velikost_policka, Hrac_Y // velikost_policka, radius=3)
             check_map_reset()
             check_barrel()
-
-            # Ovládání hráče
+            
+            
+            if lore_screen_active:
+                pygame.draw.rect(Obraz, (200, 200, 200), (100, 100, 600, 400))  # Lore okno
+                pygame.display.update()
+                continue
+            
             keys = pygame.key.get_pressed()
             new_x, new_y = Hrac_X, Hrac_Y
             moving = False
@@ -635,17 +653,17 @@ while smycka:
                 zkontroluj_medkit(maze, tile_y, tile_x)
                 
             if maze[tile_y][tile_x] == 3:
-                ma_klic = True  # Hráč získal klíč
-                maze[tile_y][tile_x] = 0  # Klíč zmizí z mapy (nahradíme ho prázdnou cestou)
-                dvere_pozice = (tile_y, tile_x)  # Ulož pozici, kde byl klíč
+                ma_klic = True  
+                maze[tile_y][tile_x] = 0 
+                dvere_pozice = (tile_y, tile_x)  
                 
-            if maze[tile_y][tile_x] == 6:  # Pokud hráč stoupne na teleportovací bod
-                teleportace(1320, 720, 3)  # Teleport na souřadnice (1200, 400) a nový level 2 (index 1)
+            if maze[tile_y][tile_x] == 6:  
+                teleportace(1320, 720, 3)  
                 maze[tile_y][tile_x] = 0
                 
-                maze[tile_y][tile_x] = 0  # Můžeme odstranit teleport z mapy
+                maze[tile_y][tile_x] = 0  
             if maze[tile_y][tile_x] == 9 and ma_klic:
-                nacti_novy_level()  # Načtení nové místnosti nebo levelu
+                nacti_novy_level()  
 
             
 
@@ -692,7 +710,7 @@ while smycka:
                 distance_x = abs(enemy.x - Hrac_X) // velikost_policka
                 distance_y = abs(enemy.y - Hrac_Y) // velikost_policka
 
-                if distance_x <= 3 and distance_y <= 3:
+                if distance_x <= 2 and distance_y <= 2:
                     enemy.draw(Herni_okno)
 
             #pohyb nepratel + kolize
@@ -701,7 +719,7 @@ while smycka:
                 enemy_grid_x, enemy_grid_y = enemy.x // velikost_policka, enemy.y // velikost_policka
                 player_grid_x, player_grid_y = Hrac_X // velikost_policka, Hrac_Y // velikost_policka
 
-                if abs(enemy_grid_x - player_grid_x) <= 7 and abs(enemy_grid_y - player_grid_y) <= 7:
+                if abs(enemy_grid_x - player_grid_x) <= 4and abs(enemy_grid_y - player_grid_y) <= 4:
                     enemy.path = astar((enemy_grid_x, enemy_grid_y), (player_grid_x, player_grid_y), maze)
 
                 enemy.move_towards()
