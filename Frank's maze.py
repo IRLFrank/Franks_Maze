@@ -570,6 +570,26 @@ def teleportace(novy_x, novy_y, novy_level_index):
     Hrac_X, Hrac_Y = novy_x, novy_y  
     maze = maze_lvls[novy_level_index]  
     
+def render_multiline_text(surface, text, font, color, rect):
+    words = text.split(" ")
+    lines = []
+    current_line = ""
+
+    for word in words:
+        test_line = current_line + word + " "
+        if font.size(test_line)[0] < rect.width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word + " "
+    lines.append(current_line)
+
+    # Vykreslení jednotlivých řádků
+    y = rect.y
+    for line in lines:
+        rendered_text = font.render(line, True, color)
+        surface.blit(rendered_text, (rect.x, y))
+        y += font.get_height()
 
 
 ohen_zobrazen = False
@@ -591,9 +611,11 @@ while smycka:
                 game_screen = True
                 main_screen = False
                 reset_game()
+                
             if lore_button_rect.collidepoint(event.pos):
                 lore_screen_active = True  # Zobrazení lore obrazovky
-                print("Lore screen active") 
+                print("Lore screen active")
+                
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 lore_screen_active = False
@@ -607,20 +629,24 @@ while smycka:
         Obraz.blit(start_button, start_button_rect.topleft)
         Obraz.blit(quit_button, quit_button_rect.topleft)
         Obraz.blit(lore_button, lore_button_rect)
+        
     if lore_screen_active:
-        pygame.draw.rect(Obraz, (200, 200, 200), (500, 500, 600, 400))  
-        lore_text = font.render(
-        "Král Arthur II. věděl, že v temných hlubinách Abyss leží odpověď, která by mohla zvrátit osud celého království.S vírou ve svou družinu, se vydal na výpravu, aby získal poklad ukrytý v Abbys.Když Kaelen, poslední z družiny, dorazil k bránám tohoto zapomenutého světa, nic ho nemohlo připravit na to, co čekalo uvnitř. Družina byla zničena v okamžiku, kdy se pokusili přiblížit k tajemství… a on sám nyní čelí samotnému temnému srdci Abyss.Kde je klíč, který mu umožní opustit tento zatracený svět? A jaký poklad ukrývá? Na to musí Kaelen najít odpovědi – a přežít. ", True, (0, 0, 0))  
-        Obraz.blit(lore_text, (500, 500))
-        text_x = lore_rect.x + 555  # Pozice x uvnitř lore okna (20px od levého okraje)
-        text_y = lore_rect.y + 555  # Pozice y uvnitř lore okna (20px od horního okraje)
-        Obraz.blit(lore_text, (text_x, text_y))
+        dopis_background = pygame.image.load('dopis.jpeg')
+        dopis_background = pygame.transform.scale(dopis_background, (1000, 400))  # Přizpůsobení velikosti
+        Obraz.blit(dopis_background, (500, 400))  # Zobrazení pozadí lore okna
+        lore_surface = pygame.Surface((0,0))  # Vytvoření povrchu pro okno lore
+        lore_surface.set_alpha(200)  # Nastavení alfa hodnoty (180 znamená 70% průhlednost)
+        lore_surface.fill((200, 200, 200))  # Vyplnění povrchu světle šedou barvou
+        Obraz.blit(lore_surface, (800, 500))
+       
+        lore_text ="Král Arthur II. věděl, že v temných hlubinách Abyss leží odpověď, která by mohla zvrátit osud celého království.S vírou ve svou družinu, se vydal na výpravu, aby získal poklad ukrytý v Abbys.Když Kaelen, poslední z družiny, dorazil k bránám tohoto zapomenutého světa, nic ho nemohlo připravit na to, co čekalo uvnitř. Družina byla zničena v okamžiku, kdy se pokusili přiblížit k tajemství… a on sám nyní čelí samotnému temnému srdci Abyss.Kde je klíč, který mu umožní opustit tento zatracený svět? A jaký poklad ukrývá? Na to musí Kaelen najít odpovědi – a přežít.                              Escape pro vypnutí Lore "
+        text_rect = pygame.Rect(520, 420, 900, 300)  # Menší obdélník uvnitř okna
+        render_multiline_text(Obraz, lore_text, font, (255 , 255 , 255), text_rect)
+        
         pygame.display.update()
         continue
 
-    
-    if game_screen:
-        pass    
+  
     if game_screen:  
         if not player_dead:
             Herni_okno.fill(GREEN)
