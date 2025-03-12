@@ -170,21 +170,23 @@ enemy_image = pygame.transform.scale(enemy_image, (velikost_policka, velikost_po
 death_screen = pygame.image.load("DIED.png")  
 death_screen = pygame.transform.scale(death_screen, (Herni_okno_X, Herni_okno_Y))
 
+lore_rect = pygame.Rect(100, 100, 600, 400)
+
 lore_button = pygame.image.load('lore.png')
 start_button = pygame.image.load('start_button.png')    
 quit_button = pygame.image.load('quit_button.png')
 
-lore_button_rect = lore_button.get_rect() 
+lore_button_rect = lore_button.get_rect()
 start_button_rect = start_button.get_rect()
 quit_button_rect = quit_button.get_rect()
 
-lore_button_rect.topleft = ((Hlavni_screen_X - lore_button_rect.width) // 2, (Hlavni_screen_Y // 2)  -500)  
+
 start_button_rect.topleft = ((Hlavni_screen_X - start_button_rect.width) // 2, (Hlavni_screen_Y // 2) +100)  
 quit_button_rect.topleft = ((Hlavni_screen_X - quit_button_rect.width) // 2, (Hlavni_screen_Y // 2) + 395)
-
-
+lore_button_rect.topleft = ((Hlavni_screen_X - lore_button_rect.width) // 2, (Hlavni_screen_Y // 2) - 100)
 
 lore_screen_active = False
+
 #---------------------------------------------------------------------------------------#
 
 
@@ -589,15 +591,13 @@ while smycka:
                 game_screen = True
                 main_screen = False
                 reset_game()
+            if lore_button_rect.collidepoint(event.pos):
+                lore_screen_active = True  # Zobrazení lore obrazovky
+                print("Lore screen active") 
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                lore_screen_active = False
                 
-            if lore_button_rect.collidepoint(event.pos):  # Kliknutí na lore obrázek
-                lore_screen_active = True
-
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    lore_screen_active = False
-
-
         if event.type == pygame.USEREVENT:
             hraj_hudbu()
 
@@ -606,8 +606,21 @@ while smycka:
         Obraz.blit(menu_bg, menu_bg_rect.topleft)  
         Obraz.blit(start_button, start_button_rect.topleft)
         Obraz.blit(quit_button, quit_button_rect.topleft)
-        Obraz.blit(lore_button, lore_button_rect.topleft)
+        Obraz.blit(lore_button, lore_button_rect)
+    if lore_screen_active:
+        pygame.draw.rect(Obraz, (200, 200, 200), (500, 500, 600, 400))  
+        lore_text = font.render(
+        "Král Arthur II. věděl, že v temných hlubinách Abyss leží odpověď, která by mohla zvrátit osud celého království.S vírou ve svou družinu, se vydal na výpravu, aby získal poklad ukrytý v Abbys.Když Kaelen, poslední z družiny, dorazil k bránám tohoto zapomenutého světa, nic ho nemohlo připravit na to, co čekalo uvnitř. Družina byla zničena v okamžiku, kdy se pokusili přiblížit k tajemství… a on sám nyní čelí samotnému temnému srdci Abyss.Kde je klíč, který mu umožní opustit tento zatracený svět? A jaký poklad ukrývá? Na to musí Kaelen najít odpovědi – a přežít. ", True, (0, 0, 0))  
+        Obraz.blit(lore_text, (500, 500))
+        text_x = lore_rect.x + 555  # Pozice x uvnitř lore okna (20px od levého okraje)
+        text_y = lore_rect.y + 555  # Pozice y uvnitř lore okna (20px od horního okraje)
+        Obraz.blit(lore_text, (text_x, text_y))
+        pygame.display.update()
+        continue
 
+    
+    if game_screen:
+        pass    
     if game_screen:  
         if not player_dead:
             Herni_okno.fill(GREEN)
@@ -625,10 +638,7 @@ while smycka:
             check_barrel()
             
             
-            if lore_screen_active:
-                pygame.draw.rect(Obraz, (200, 200, 200), (100, 100, 600, 400))  # Lore okno
-                pygame.display.update()
-                continue
+            
             
             keys = pygame.key.get_pressed()
             new_x, new_y = Hrac_X, Hrac_Y
