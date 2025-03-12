@@ -81,7 +81,7 @@ def check_barrel_sound():
             
 victory_played = False
 
-# Funkce pro přehrání zvuku při vítězství
+
 def play_victory_sound():
     global victory_played
     if not victory_played:
@@ -116,10 +116,10 @@ def vykresli_zivoty(herni_okno):
 #---------------------------------------------------------------------------------------#
 Hlavni_screen_X = 1980
 Hlavni_screen_Y = 1080
-BLACK = (0, 0, 0)  # Barva stěn
+BLACK = (0, 0, 0)  
 WHITE = (255, 255, 255)
-GREEN = (0, 0, 0)  # Barva pozadí
-BROWN = (169, 66, 19)  # Casovac
+GREEN = (0, 0, 0)  
+BROWN = (169, 66, 19)  
 font = pygame.font.SysFont("Arial", 30)
 
 velikost_policka = 40
@@ -151,10 +151,12 @@ Obraz = pygame.display.set_mode((Hlavni_screen_X, Hlavni_screen_Y))
 
 
 #---------------------------------------------------------------------------------------#
-# Načtení obrázku hlavního menu
 menu_bg = pygame.image.load('ABBYS.png')
 menu_bg_rect = menu_bg.get_rect()
 menu_bg_rect.center = (Hlavni_screen_X // 2, (Hlavni_screen_Y // 2) - 280)
+
+dvere_z_secret_image = pygame.image.load('cil.png')
+dvere_z_secret_image = pygame.transform.scale(dvere_z_secret_image, (velikost_policka, velikost_policka))
 
 klic_image = pygame.image.load('klic.png')
 klic_image = pygame.transform.scale(klic_image, (velikost_policka, velikost_policka))
@@ -165,6 +167,8 @@ end_screen_image = pygame.transform.scale(end_screen_image, (1400, 790))
 enemy_image = pygame.image.load("enemy.webp")
 enemy_image = pygame.transform.scale(enemy_image, (velikost_policka, velikost_policka))
 
+death_screen = pygame.image.load("DIED.png")  
+death_screen = pygame.transform.scale(death_screen, (Herni_okno_X, Herni_okno_Y))
 
 start_button = pygame.image.load('start_button.png')    
 quit_button = pygame.image.load('quit_button.png')
@@ -183,11 +187,11 @@ background_lvls = [
     pygame.image.load('Background_herni_image1.png'),  
     pygame.image.load('Background_herni_image2.png'),  
     pygame.image.load('Background_herni_image3.png'),  
-    pygame.image.load('Background_herni_image4.png')   
+    pygame.image.load('Background_herni_image4.png'),
+    pygame.image.load('pozadi_secret.png')
 ]
 
-death_screen = pygame.image.load("DIED.png")  
-death_screen = pygame.transform.scale(death_screen, (Herni_okno_X, Herni_okno_Y))
+
 
 def load_maze_from_file(filename):
     maze = []
@@ -202,12 +206,11 @@ maze_lvls = [
     load_maze_from_file("level2.txt"), 
     load_maze_from_file("level3.txt"),        
     load_maze_from_file("level4.txt"),
-    load_maze_from_file("secret.txt")  # Tajemný level
+    load_maze_from_file("secret.txt")
 ]
 
 aktualni_lvl = 0
 maze = maze_lvls[aktualni_lvl]
-
 main_screen = True
 game_screen = False
 
@@ -222,13 +225,13 @@ Hrac_X = start_x
 Hrac_Y = start_y  
 
 
-Hrac_rychlost_enemy = 10
+Hrac_rychlost = 5	
 Hrac_textura = pygame.image.load('hrac.png')
 Hrac_textura = pygame.transform.scale(Hrac_textura, (Hrac_velikost, Hrac_velikost))    
 
 start_time = None  
 uplynulicas = 0
-ma_klic = False  # Na začátku hráč klíč nemá
+ma_klic = False  
 
 #---------------------------------------------------------------------------------------#
 
@@ -247,7 +250,10 @@ def check_level_complete():
     misto_x = (len(maze[0]) - 2) * velikost_policka
     misto_y = (len(maze) - 2) * velikost_policka
 
-    # Kontrola pro standardní dveře do další úrovně
+
+#---------------------------------------------------------------------------------------#
+
+    
     if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 2:
         saved_position_x, saved_position_y = Hrac_X, Hrac_Y
         dokoncenych_levelu += 1
@@ -266,15 +272,15 @@ def check_level_complete():
             end_screen_shown = True 
             game_screen = False
 
-    # Kontrola pro dveře do tajemné místnosti (level 9)
+    
     elif maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 9 and ma_klic:
-        door_sound.play()  # Zvuk dveří
-        nacti_novy_level()  # Načti tajemný level
+        door_sound.play()  
+        nacti_novy_level()  
 
-    # Kontrola pro zpětné dveře (level 4)
+    
     elif maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 4:
         door_sound.play()
-        aktualni_lvl -= 1  # Vrátí hráče na předchozí level
+        aktualni_lvl -= 1  
         maze = maze_lvls[aktualni_lvl]
         Hrac_X, Hrac_Y = saved_position_x, saved_position_y
         Hrac_X -= 30
@@ -283,15 +289,15 @@ def check_level_complete():
 
 def nacti_novy_level():
     global maze, aktualni_lvl
-    aktualni_lvl = 4  # Index pro tajemný level (5. level)
-    maze = maze_lvls[aktualni_lvl]  # Načteme tajemný level
-    Hrac_X, Hrac_Y = start_position_of_secret_level()  # Výchozí pozice hráče pro tajemný level
-    start_time = time.time()  # Obnovení času pro nový level
-    enemies.clear()  # Vymažeme předchozí nepřátele
-    enemies.extend(load_enemies(maze))  # Načteme nepřátele pro tajemný level
+    aktualni_lvl = 4  
+    maze = maze_lvls[aktualni_lvl]  
+    Hrac_X, Hrac_Y = start_position_of_secret_level()  
+    start_time = time.time()  
+    enemies.clear()  
+    enemies.extend(load_enemies(maze))  
 
 def start_position_of_secret_level():
-    return (40, 40)  # Příklad: Začátek na pozici (40, 40)
+    return (40, 40)  
 
         
 def check_for_backdoor():
@@ -319,7 +325,14 @@ def zobrazit_end_screen():
     if end_screen_shown:
         Obraz.blit(end_screen_image, ( 290, 140 ))
         pygame.display.update()
-
+      
+def zkontroluj_klic(maze, Hrac_X, Hrac_Y):
+    global ma_klic  
+    if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 3:  
+        ma_klic = True  
+        maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] = 0 
+        print("Hráč získal klíč!")
+        hit_sound.play()  # Případně přehrát zvuk pro získání klíče
         
           
 #---------------------------------------------------------------------------------------#
@@ -340,10 +353,44 @@ def byla_kolize(nove_x, nove_y):
             return True  
     return False
 
+def otevri_tajemne_dvere(maze, Hrac_X, Hrac_Y):
+    global ma_klic  
+    if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 9: 
+        if ma_klic:
+            print("Hráč otevřel dveře do tajemné místnosti!")
+            maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] = 0  
+        else:
+            print("Hráč nemá klíč a nemůže otevřít dveře!")
+            
+def teleport_do_tajemne_mistnosti(maze, Hrac_X, Hrac_Y):
+    global maze_level  
+    if maze[Hrac_Y // velikost_policka][Hrac_X // velikost_policka] == 9:  
+        print("Hráč prošel dveřmi do tajemné místnosti!")
+        maze = load_maze_from_file("secret.txt")  
+        maze_level = "secret"  
+        return maze
+    return maze
 
-#---------------------------------------------------------------------------------------#
 
+#------------------------------------tady je secret lvl-----------------------------------------#
 
+def vykresli_novou_mapu(maze):
+    for radky in range(len(maze)):
+        for sloupce in range(len(maze[radky])):
+            if maze[radky][sloupce] == 1:  # Stěna
+                pygame.draw.rect(Herni_okno, GREEN, (sloupce * velikost_policka, radky * velikost_policka, velikost_policka, velikost_policka))
+            elif maze[radky][sloupce] == 2:  # Cíl
+                exit_image = pygame.image.load('cil.png')
+                exit_image = pygame.transform.scale(exit_image, (velikost_policka, velikost_policka))
+                Herni_okno.blit(exit_image, (sloupce * velikost_policka, radky * velikost_policka))
+            elif maze[radky][sloupce] == 6:  # Dveře s obrázkem 'cil.png' a číslem 6
+                Herni_okno.blit(dvere_z_secret_image, (sloupce * velikost_policka, radky * velikost_policka))
+            elif maze[radky][sloupce] == 9:  # Dveře
+                secret_door_image = pygame.image.load('doors.png')
+                secret_door_image = pygame.transform.scale(secret_door_image, (velikost_policka, velikost_policka))
+                Herni_okno.blit(secret_door_image, (sloupce * velikost_policka, radky * velikost_policka))
+                
+#--------------------------------------tady je noramlni vize---------------------------------------#
 def zobraz_vizi(maze, player_x, player_y, radius=0):
     for radky in range(player_y - radius, player_y + radius + 0):
         for sloupce in range(player_x - radius, player_x + radius + 0):
@@ -362,12 +409,14 @@ def zobraz_vizi(maze, player_x, player_y, radius=0):
                     barrel_image = pygame.image.load('barel.png')  
                     barrel_image = pygame.transform.scale(barrel_image, (velikost_policka, velikost_policka))
                     Herni_okno.blit(barrel_image, (sloupce * velikost_policka, radky * velikost_policka))
+                elif maze[radky][sloupce] == 6:  # Dveře s obrázkem 'cil.png' a číslem 6
+                    Herni_okno.blit(dvere_z_secret_image, (sloupce * velikost_policka, radky * velikost_policka))
                 elif maze[radky][sloupce] == 7:  # Medkit
                     Herni_okno.blit(medkit_image, (sloupce * velikost_policka + 10, radky * velikost_policka + 10))
-                elif maze[radky][sloupce] == 3:  # Klíč
+                elif maze[radky][sloupce] == 3 and not ma_klic:  # Klíč
                     Herni_okno.blit(klic_image, (sloupce * velikost_policka + 10, radky * velikost_policka + 10))
-                elif maze[radky][sloupce] == 9:  # Dveře do tajemné místnosti
-                    secret_door_image = pygame.image.load('cil.png')  # Nahraď za svůj obrázek
+                elif maze[radky][sloupce] == 9:  # Dveře
+                    secret_door_image = pygame.image.load('doors.png')
                     secret_door_image = pygame.transform.scale(secret_door_image, (velikost_policka, velikost_policka))
                     Herni_okno.blit(secret_door_image, (sloupce * velikost_policka, radky * velikost_policka))
 
@@ -424,36 +473,25 @@ class Enemy:
         self.x = x * velikost_policka
         self.y = y * velikost_policka
         self.path = []
-
     def move_towards(self):
         if not self.path:  
             return  
-
         next_x, next_y = self.path.pop(0)  
         rychlost_enemy = 3  # Nastav rychlost pohybu nepřítele
-
-        
         smer_x = (next_x * velikost_policka - self.x)
         smer_y = (next_y * velikost_policka - self.y)
-
         if abs(smer_x) > rychlost_enemy:
             self.x += rychlost_enemy if smer_x > 0 else -rychlost_enemy
         else:
             self.x = next_x * velikost_policka
-
         if abs(smer_y) > rychlost_enemy:
             self.y += rychlost_enemy if smer_y > 0 else -rychlost_enemy
         else:
             self.y = next_y * velikost_policka
-
-        
         if abs(self.x - Hrac_X) < velikost_policka and abs(self.y - Hrac_Y) < velikost_policka:
             enemies.remove(self)
-
     def draw(self, screen):
         screen.blit(enemy_image, (self.x, self.y))
-
-
 def load_enemies(maze):
     enemies = []  
     for y in range(len(maze)):
@@ -461,10 +499,7 @@ def load_enemies(maze):
             if maze[y][x] == 8:  
                 enemies.append(Enemy(x, y))  
     return enemies  
-
-
 enemies = load_enemies(maze)
-
 #---------------------------------------------------------------------------------------#
         
             
@@ -521,7 +556,14 @@ def zkontroluj_medkit(maze, Hrac_Y,Hrac_X):
             HP = min(HP + 2, 8)
             print(f"Hráč získal 2 HP! Aktuální HP: {HP}")
             heal_sound.play()
-        maze[Hrac_Y][Hrac_X] = 0  
+        maze[Hrac_Y][Hrac_X] = 0
+        
+def teleportace(novy_x, novy_y, novy_level_index):
+    global Hrac_X, Hrac_Y, maze
+    Hrac_X, Hrac_Y = novy_x, novy_y  # Nastavíme novou pozici hráče
+    maze = maze_lvls[novy_level_index]  # Načteme nový level podle indexu
+    print(f"Teleportováno na: ({Hrac_X}, {Hrac_Y}), nový level index: {novy_level_index}")
+
 
 ohen_zobrazen = False
 pozice_ohne = (0, 0)
@@ -559,7 +601,7 @@ while smycka:
             current_background = background_lvls[aktualni_lvl]
             current_background = pygame.transform.scale(current_background, (Herni_okno_X, Herni_okno_Y))
             Herni_okno.blit(current_background, (0, 0))
-
+            
             vykresli_zivoty(Herni_okno)
 
             if start_time is None:
@@ -575,16 +617,16 @@ while smycka:
             moving = False
 
             if keys[K_w]:
-                new_y -= Hrac_rychlost_enemy
+                new_y -= Hrac_rychlost
                 moving = True
             if keys[K_s]:
-                new_y += Hrac_rychlost_enemy
+                new_y += Hrac_rychlost
                 moving = True
             if keys[K_a]:
-                new_x -= Hrac_rychlost_enemy
+                new_x -= Hrac_rychlost
                 moving = True
             if keys[K_d]:
-                new_x += Hrac_rychlost_enemy
+                new_x += Hrac_rychlost
                 moving = True
 
             tile_x = Hrac_X // velikost_policka
@@ -592,20 +634,20 @@ while smycka:
             if 0 <= tile_y < len(maze) and 0 <= tile_x < len(maze[0]):
                 zkontroluj_medkit(maze, tile_y, tile_x)
                 
-            if maze[tile_y][tile_x] == 3:  # Klíč
+            if maze[tile_y][tile_x] == 3:
                 ma_klic = True  # Hráč získal klíč
-                maze[tile_y][tile_x] = 0  # Klíč zmizí z mapy
+                maze[tile_y][tile_x] = 0  # Klíč zmizí z mapy (nahradíme ho prázdnou cestou)
                 dvere_pozice = (tile_y, tile_x)  # Ulož pozici, kde byl klíč
-
-            if ma_klic and dvere_pozice is not None:
-                y, x = dvere_pozice  # Pozice, kde se objeví dveře
-                maze[y][x] = 9  # Změníme pozici na dveře
-
+                
+            if maze[tile_y][tile_x] == 6:  # Pokud hráč stoupne na teleportovací bod
+                teleportace(1320, 720, 3)  # Teleport na souřadnice (1200, 400) a nový level 2 (index 1)
+                maze[tile_y][tile_x] = 0
+                
+                maze[tile_y][tile_x] = 0  # Můžeme odstranit teleport z mapy
             if maze[tile_y][tile_x] == 9 and ma_klic:
                 nacti_novy_level()  # Načtení nové místnosti nebo levelu
 
-
-
+            
 
             if not byla_kolize(new_x, new_y):
                 Hrac_X, Hrac_Y = new_x, new_y
@@ -655,7 +697,6 @@ while smycka:
 
             #pohyb nepratel + kolize
             to_remove = []
-
             for enemy in enemies:
                 enemy_grid_x, enemy_grid_y = enemy.x // velikost_policka, enemy.y // velikost_policka
                 player_grid_x, player_grid_y = Hrac_X // velikost_policka, Hrac_Y // velikost_policka
